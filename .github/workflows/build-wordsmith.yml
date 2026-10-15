@@ -1,0 +1,64 @@
+
+# Nom affiché dans l'onglet Actions de GitHub.
+name: Build and publish Wordsmith images
+
+# Le workflow se déclenche lorsqu'un label est ajouté à une Pull Request.
+on:
+  pull_request:
+    types: [labeled]
+
+# Autorise le workflow à lire le code du dépôt.
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    # Nom du job affiché dans l'interface GitHub Actions.
+    name: Build and push Docker images
+
+    # GitHub exécute ce job sur une machine virtuelle Ubuntu.
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupère le code source de la branche de la Pull Request.
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2. Installe Docker Buildx, utilisé pour construire les images.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Se connecte à Docker Hub avec les secrets GitHub.
+      # Le token n'est pas écrit en clair dans ce fichier.
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4. Construit l'image du serveur Web depuis le dossier web.
+      # Publie cette image avec le tag :web.
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/wordsmith:web
+
+      # 5. Construit l'image de l'API Java depuis le dossier words.
+      # Publie cette image avec le tag :words.
+      - name: Build and push words image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./words
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/wordsmith:words
+
+      # 6. Construit l'image de base de données depuis le dossier db.
+      # Publie cette image avec le tag :db.
+      - name: Build and push db image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./db
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/wordsmith:db
