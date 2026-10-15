@@ -1,0 +1,18 @@
+# Dans les versions modernes, le champ version est obsolète et peut être omis.
+
+services:  # Déclare les services de l'application.
+
+  web:  # Premier service : le frontend écrit en Go.
+    build: web  # Construit l'image à partir du dossier ./web et de son Dockerfile.
+    ports:
+      - "8080:80"  # Port 8080 de l'hôte → port 80 du conteneur.
+    depends_on:
+      - words  # Demande à Compose de démarrer words avant web.
+
+  words:  # Deuxième service : l'API Java.
+    build: words  # Construit l'image à partir du dossier ./words.
+    depends_on:
+      - db  # Demande à Compose de démarrer db avant words.
+
+  db:  # Troisième service : la base de données PostgreSQL.
+    build: db  # Construit l'image à partir du dossier ./db.

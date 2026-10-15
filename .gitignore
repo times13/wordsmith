@@ -1,0 +1,14 @@
+﻿# Fichiers générés par Maven
+**/target/
+
+# Fichiers de configuration locaux
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Fichiers temporaires et système
+.DS_Store
+Thumbs.db
